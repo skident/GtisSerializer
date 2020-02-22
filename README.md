@@ -1,3 +1,5 @@
+![C/C++ CI](https://github.com/skident/GtisSerializer/workflows/C/C++%20CI/badge.svg?branch=master)
+
 # GitsSerializer
 
 ## Aim
