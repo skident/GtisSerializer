@@ -1,4 +1,5 @@
 QT -= gui
+QT += sql
 
 CONFIG += c++17 console
 CONFIG -= app_bundle
@@ -29,7 +30,8 @@ HEADERS += \
     serializable/Serializable.h \
     \
     serializer/NlohmannJSON.h \
-    serializer/QtJSON.h \
+    serializer/QtSqlInsertSerializer.h \
+    serializer/QtSqlSelectSerializer.h \
     serializer/StdOstream.h \
     serializer/StdString.h \
     serializer/TSerializer.h \
@@ -74,6 +76,9 @@ HEADERS += \
     third/magic_get/include/boost/pfr/precise/ops.hpp \
     third/magic_get/include/boost/pfr/precise/tuple_size.hpp \
     third/nlohmann/json.hpp \
+    utils/CompareUtils.h \
+    utils/SfinaeSerializableUtils.h \
+    utils/TupleUtils.h \
     utils/Utils.h
 
 DISTFILES += \

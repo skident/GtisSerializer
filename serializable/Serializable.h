@@ -2,6 +2,10 @@
 
 #include <string>
 
+#define GITS_SERIALIZABLE_STRUCT char __gits_serializable_struct__;
+#define GITS_SERIALIZABLE char __gits_serializable__;
+
+
 //https://stackoverflow.com/questions/1826464/c-style-strings-as-template-arguments
 
 template <char... chars>
@@ -32,12 +36,12 @@ struct SerializableName<tstring<elements...>> {
     }
 };
 
-
 template <class T, class U>
 struct TSerializable
 {
     U name;
     T value;
+    GITS_SERIALIZABLE
 
     TSerializable() = default;
     TSerializable(const T& inValue) { this->value = inValue; }
