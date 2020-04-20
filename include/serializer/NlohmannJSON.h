@@ -5,13 +5,13 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <list>
 
 #include "nlohmann/json.hpp"
 #include "utils/Utils.h"
-#include "serializable/Serializable.h"
-#include "utils/SfinaeSerializableUtils.h"
+#include "types/Serializable.h"
 
-namespace serializer
+namespace bhr::serializer
 {
 
 ////////////////////////////////////////////////
@@ -40,11 +40,11 @@ private:
     {
         if constexpr (sfinae_utils::is_serializable<T>::value)
         {
-            auto value = inSerialized[outValue.name.GetString()];
+            auto value = inSerialized[outValue.GetName()];
 
             if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
             {
-                deserialize(inSerialized[outValue.name.GetString()], outValue.value); // recursion
+                deserialize(inSerialized[outValue.GetName()], outValue.value); // recursion
             }
             else
             {
@@ -167,6 +167,14 @@ private:
         serialize_key_value(outSerialized, inName, std::vector<T>(inSerializable.begin(), inSerializable.end()));
     }
 
+    template <class T>
+    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+                                              const std::string& inName,
+                                              const std::list<T>& inSerializable)
+    {
+        serialize_key_value(outSerialized, inName, std::vector<T>(inSerializable.begin(), inSerializable.end()));
+    }
+
     template <class T, class U>
     static constexpr void serialize_key_value(OutSerialized& outSerialized,
                                               const std::string& inName,
@@ -186,12 +194,15 @@ private:
         {
             if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
             {
-                serialize(outSerialized[inSerializable.name.GetString()], inSerializable.value); // recursion
+                serialize(outSerialized[inSerializable.GetName()], inSerializable.value); // recursion
             }
             else
             {
-                serialize_key_value(outSerialized, inSerializable.name.GetString(), inSerializable.value);
+                serialize_key_value(outSerialized, inSerializable.GetName(), inSerializable.value);
             }
+        }
+        else {
+            // non-serializable value
         }
     }
 
@@ -203,6 +214,14 @@ public:
         std::apply([&outSerialized](auto&&... elem) {
             ((serialize_impl(outSerialized, elem)), ...);
         }, tmpTuple);
+    }
+
+    template <class InSerializable>
+    static OutSerialized serialize(const InSerializable& inSerializable)
+    {
+        OutSerialized outSerialized;
+        serialize(outSerialized, inSerializable);
+        return outSerialized;
     }
 };
 ////////////////////////////////////////////////
@@ -229,6 +248,5 @@ public:
         NlohmannDeserializer::deserialize(inSerialized, outDeserialized);
     }
 };
-
 
 }

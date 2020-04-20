@@ -4,6 +4,9 @@ QT += sql
 CONFIG += c++17 console
 CONFIG -= app_bundle
 
+QMAKE_CXXFLAGS += -Wno-gnu-string-literal-operator-template
+
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -17,9 +20,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += "third/magic_get/include"
 INCLUDEPATH += "third/"
+INCLUDEPATH += "include/"
 
 SOURCES += \
-        main.cpp
+        src/main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -27,15 +31,17 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    serializable/Serializable.h \
+    include/types/Serializable.h \
     \
-    serializer/NlohmannJSON.h \
-    serializer/QtSqlInsertSerializer.h \
-    serializer/QtSqlSelectSerializer.h \
-    serializer/StdOstream.h \
-    serializer/StdString.h \
-    serializer/TSerializer.h \
+    include/serializer/NlohmannJSON.h \
+    include/serializer/QtSqlInsertSerializer.h \
+    include/serializer/QtSqlSelectSerializer.h \
+    include/serializer/StdOstream.h \
+    include/serializer/StdString.h \
+    include/serializer/TSerializer.h \
     \
+    src/Example_1.h \
+    src/Example_2.h \
     third/magic_get/doc/pfr.qbk \
     third/magic_get/include/boost/pfr.hpp \
     third/magic_get/include/boost/pfr/detail/cast_to_layout_compatible.hpp \
@@ -77,8 +83,6 @@ HEADERS += \
     third/magic_get/include/boost/pfr/precise/tuple_size.hpp \
     third/nlohmann/json.hpp \
     utils/CompareUtils.h \
-    utils/SfinaeSerializableUtils.h \
-    utils/TupleUtils.h \
     utils/Utils.h
 
 DISTFILES += \

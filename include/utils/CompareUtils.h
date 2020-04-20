@@ -5,8 +5,9 @@
 #include <string>
 #include <utility>
 
-namespace utils
+namespace bhr::utils
 {
+
 template <class T>
 bool AreEquals(const T& lhs, const T& rhs)
 {
@@ -18,4 +19,5 @@ bool AreEquals(const T& lhs, const T& rhs)
 
     return (std::hash<std::string>{}(lhs_str) == std::hash<std::string>{}(rhs_str));
 }
+
 }

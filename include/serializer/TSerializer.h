@@ -1,6 +1,6 @@
 #pragma once
 
-namespace serializer
+namespace bhr::serializer
 {
 
 template <class T>

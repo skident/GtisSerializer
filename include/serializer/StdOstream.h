@@ -8,13 +8,11 @@
 #include <set>
 
 #include "utils/Utils.h"
-#include "serializable/Serializable.h"
-#include "utils/SfinaeSerializableUtils.h"
-#include "utils/TupleUtils.h"
 
-namespace serializer
+#include "types/Serializable.h"
+
+namespace bhr::serializer
 {
-
 
 class StdOstream
 {
@@ -94,7 +92,6 @@ private:
         for (const auto& elem : inSerializable)
         {
             first = addSeparator(first, outSerialized, S_COMMA, S_SPACE);
-//            outSerialized << S_QUOTE << elem.first << S_QUOTE << S_COLON << S_SPACE;
             serialize_value(outSerialized, elem.first);
             outSerialized << S_COLON << S_SPACE;
             serialize_value(outSerialized, elem.second);
@@ -108,7 +105,7 @@ private:
     {
         if constexpr (sfinae_utils::is_serializable<T>::value)
         {
-            outSerialized << S_QUOTE << inSerializable.name.GetString() << S_QUOTE << S_COLON << S_SPACE;
+            outSerialized << S_QUOTE << inSerializable.GetName() << S_QUOTE << S_COLON << S_SPACE;
             if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
             {
                 outSerialized << S_CURLY_BRACE_OPEN;

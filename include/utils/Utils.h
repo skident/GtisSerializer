@@ -3,7 +3,7 @@
 #include <tuple>
 
 //https://stackoverflow.com/questions/38561242/struct-to-from-stdtuple-conversion
-namespace utils
+namespace bhr::utils
 {
 
 namespace details
@@ -16,7 +16,7 @@ make_struct(std::tuple< types... > t, std::index_sequence< indices... >) // &, &
     return {std::get< indices >(t)...};
 }
 
-}
+} // details
 
 template< typename result_type, typename ...types >
 result_type

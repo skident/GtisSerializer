@@ -1,6 +1,6 @@
-![C/C++ CI](https://github.com/skident/GtisSerializer/workflows/C/C++%20CI/badge.svg?branch=master)
+![C/C++ CI](https://github.com/skident/BhrSerializer/workflows/C/C++%20CI/badge.svg?branch=master)
 
-# GitsSerializer
+# BhrSerializer
 
 ## Aim
 Easy serialization and deserialization of simple data structures: to/from JSON, to std::string and so on.
@@ -70,17 +70,14 @@ Console output:
 
 ## Solution structure
 1. third - third party libraries
-2. serializable - data structure(s) which can be serialized/deserialized 
-3. serializer - classes for serialization: QtJSON, NlohmannJSON, StdString, StdOstream. TSerializer is kind of base class for all serializers (it is no necessary to use it)
+2. types - classes, macro and utils for a compile time reflection  
+3. serializer - classes for serialization: NlohmannJSON, StdString, StdOstream. TSerializer is kind of base class for all serializers (it is no necessary to use it)
 4. utils - util for converting std::tuple to structure
 5. main.cpp - examples of serialization and deserialization (if possible).
 
-## Work environment:
-1. IDE: Qt Creator 4.9.1
-2. Qt version 5.12.3
-3. C++17
-4. macOS Catalina 10.15.x
+## Build system:
+Cmake
 
-## Qt modules:
-1. core - Qt JSON module for serialization/deserialization  
+## C++ standard:
+C++17
 
