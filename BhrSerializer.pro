@@ -1,10 +1,15 @@
 QT -= gui
 QT += sql
 
-CONFIG += c++17 console
-CONFIG -= app_bundle
+TARGET = BhrSerializer
+#TEMPLATE = lib
+TEMPLATE = subdirs
+
+CONFIG += staticlib
+CONFIG += c++17
 
 QMAKE_CXXFLAGS += -Wno-gnu-string-literal-operator-template
+QMAKE_CXXFLAGS += -Wno-padded
 
 
 # The following define makes your compiler emit warnings if you use
@@ -22,8 +27,8 @@ INCLUDEPATH += "third/magic_get/include"
 INCLUDEPATH += "third/"
 INCLUDEPATH += "include/"
 
-SOURCES += \
-        src/main.cpp
+#SOURCES += \
+#        src/main.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
