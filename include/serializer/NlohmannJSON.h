@@ -192,13 +192,13 @@ private:
     {
         if constexpr (sfinae_utils::is_serializable<T>::value)
         {
-            if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
+            if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().GetValue())>::value)
             {
-                serialize(outSerialized[inSerializable.GetName()], inSerializable.value); // recursion
+                serialize(outSerialized[inSerializable.GetName()], inSerializable.GetValue()); // recursion
             }
             else
             {
-                serialize_key_value(outSerialized, inSerializable.GetName(), inSerializable.value);
+                serialize_key_value(outSerialized, inSerializable.GetName(), inSerializable.GetValue());
             }
         }
         else {

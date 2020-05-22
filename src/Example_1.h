@@ -17,7 +17,7 @@ struct User
 struct UserWithMacro
 {
     BHR_TYPE(std::string, name);
-    BHR_TYPE_INITED(int, age, 18);
+    BHR_TYPE(int, age) = {18};
 };
 
 class Example_1
