@@ -39,8 +39,7 @@ HEADERS += \
     include/types/Serializable.h \
     \
     include/serializer/NlohmannJSON.h \
-    include/serializer/QtSqlInsertSerializer.h \
-    include/serializer/QtSqlSelectSerializer.h \
+    include/serializer/SqliteSerializer.h \
     include/serializer/StdOstream.h \
     include/serializer/StdString.h \
     include/serializer/TSerializer.h \
