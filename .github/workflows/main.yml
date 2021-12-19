@@ -9,9 +9,10 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-    - name: qmake
-      run: qmake GitsSerializer.pro -spec macx-clang CONFIG+=x86_64 && make qmake_all
+    - name: Install CMake
+      run:  brew install cmake
+            cmake --version
+    - name: CMake
+      run: cmake --target all
     - name: make
       run: make -f Makefile all -j4
