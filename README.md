@@ -1,4 +1,4 @@
-![C/C++ CI](https://github.com/skident/eos_cpp/workflows/C/C++%20CI/badge.svg?branch=master)
+[![C/C++ CI](https://github.com/skident/eos_cpp/actions/workflows/main.yml/badge.svg)](https://github.com/skident/eos_cpp/actions/workflows/main.yml)
 
 # eos_cpp - Easy Object Serialization
 
