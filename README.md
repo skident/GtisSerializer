@@ -1,9 +1,9 @@
-![C/C++ CI](https://github.com/skident/BhrSerializer/workflows/C/C++%20CI/badge.svg?branch=master)
+![C/C++ CI](https://github.com/skident/eos_cpp/workflows/C/C++%20CI/badge.svg?branch=master)
 
-# BhrSerializer
+# eos_cpp - Easy Object Serialization
 
 ## Aim
-Easy serialization and deserialization of simple data structures: to/from JSON, to std::string and so on.
+Easy serialization and deserialization of data structures: to/from JSON, to std::string and so on.
 Any new serializer can be added just by implementing a static serialize method
 ```
 template <class InSerializable>
@@ -20,11 +20,11 @@ I define next data structure
 ```
 struct User
 {
-SERIALIZABLE(int, id);
-SERIALIZABLE(string, login);
-SERIALIZABLE(string, password);
-SERIALIZABLE(bool, activated);
-SERIALIZABLE_VAL(unsigned int, timestamp, 1582359281);
+EOS_PROPERTY(int, id);
+EOS_PROPERTY(string, login);
+EOS_PROPERTY(string, password);
+EOS_PROPERTY(bool, activated);
+EOS_PROPERTY(unsigned int, timestamp);
 };
 
 namespace Factory
@@ -37,23 +37,24 @@ namespace Factory
 }
 ```
 
-I want create a JSON object from this data structure to send it to the remote service
+I want to create a JSON object from this data structure to send it to the remote service
 ```
 User user = Factory::createUser();
-nlohmann::json lohmannObj;
-Serializer<NlohmannJSON>::serialize(lohmannObj, user);
+std::string jsonStr = eos::toJson(user);
 ```
-`lohmannObj` is ready for using.
+`jsonStr` is ready for using.
 
 let's deserialize it back:
 ```
 User user2;
-Serializer<NlohmannJSON>::deserialize(lohmannObj, user2);
+eos::fromJson(jsonStr, user2);
+
+auto user3 = eos::fromJson<User>(jsonStr);
 ```
 
 Print results to console:
 ```
-std::cout << "[serialized user] " << lohmannObj << std::endl;
+std::cout << "[serialized user] " << jsonStr << std::endl;
 Serializer<StdOstream>::serialize(std::cout << "[deserialized user] ", user2);
 ```
 

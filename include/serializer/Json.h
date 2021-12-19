@@ -246,6 +246,13 @@ public:
     {
         JsonDeserializer::deserialize(inSerialized, outDeserialized);
     }
+
+    template <class OutDeserialized>
+    static void fromJson(const std::string& inJson, OutDeserialized& outDeserialized)
+    {
+        JsonDeserializer::deserialize(nlohmann::json::parse(inJson), outDeserialized);
+    }
+
 };
 
 }
