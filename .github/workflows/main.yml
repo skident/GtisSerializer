@@ -12,6 +12,6 @@ jobs:
     - name: Install CMake
       run:  brew install cmake
     - name: CMake
-      run: cmake --target all
+      run: cmake
     - name: make
       run: make -f Makefile all -j4
