@@ -3,21 +3,21 @@
 #include "types/Serializable.h"
 #include <iostream>
 
-namespace bhr::example
+namespace eos::example
 {
 
 
 struct User
 {
-    MetaProperty<std::string, decltype("name"_cts)> name;
-    MetaProperty<int, BHR_CTS(age)> age;
+    Property<std::string, decltype("name"_cts)> name;
+    Property<int, EOS_STRING(age)> age;
 };
 
 
 struct UserWithMacro
 {
-    BHR_TYPE(std::string, name);
-    BHR_TYPE_INITED(int, age, 18);
+    EOS_PROPERTY(std::string, name);
+    EOS_PROPERTY(int, age) = {18};
 };
 
 class Example_1

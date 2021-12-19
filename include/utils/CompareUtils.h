@@ -5,7 +5,7 @@
 #include <string>
 #include <utility>
 
-namespace bhr::utils
+namespace eos::utils
 {
 
 template <class T>

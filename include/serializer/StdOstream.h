@@ -11,7 +11,7 @@
 
 #include "types/Serializable.h"
 
-namespace bhr::serializer
+namespace eos::serializer
 {
 
 class StdOstream

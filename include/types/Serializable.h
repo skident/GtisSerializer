@@ -3,17 +3,48 @@
 #include <utility>
 #include <string>
 
-// private
-#define __BHR_STRUCT_NAME__ __bhr_serializable_struct__
-#define __BHR_VAR_NAME__ __bhr_serializable__
+#include <vector>
+#include <map>
+#include <unordered_map>
 
-// public
-#define BHR_SERIALIZABLE_STRUCT char __BHR_STRUCT_NAME__;
-#define BHR_SERIALIZABLE char __BHR_VAR_NAME__;
 
-#define BHR_CTS(name) decltype(#name##_cts) // CTS - Compile Time String
-#define BHR_TYPE(Type, Name) bhr::MetaProperty<Type, BHR_CTS(Name)> Name
-#define BHR_TYPE_INITED(Type, Name, Value) BHR_TYPE(Type, Name) = Value
+// Easy Object Serialization
+
+#define INJECT_EOS_META_INFO(attr) static constexpr char eos_meta_info(){ return attr; }
+#define EOS_OBJECT INJECT_EOS_META_INFO('o')
+
+#define EOS_STRING(name) decltype(#name##_cts) // CTS - Compile Time String
+#define EOS_PROPERTY(Type, Name) eos::Property<Type, EOS_STRING(Name)> Name
+
+//////////////////////////////////
+////////// SFINAE UTILS //////////
+//////////////////////////////////
+namespace eos::sfinae_utils
+{
+
+typedef char yes;
+typedef char no[2];
+
+template <typename T>
+class serializable
+{
+    template<typename C> static yes& has_property_attr( decltype(&C::eos_meta_info) ) {return C::eos_meta_info() == 'p';}
+    template<typename C> static no& has_property_attr(...) {};
+
+    template<typename C> static yes& has_object_attr( decltype(&C::eos_meta_info) ) { return C::eos_meta_info() == 'o'; }
+    template<typename C> static no& has_object_attr(...) {};
+
+public:
+    static bool const is_property = sizeof(has_property_attr<T>(0)) == sizeof(yes);
+    static bool const is_object = sizeof(has_object_attr<T>(0)) == sizeof(yes);
+};
+}
+
+//////////////////////////////////
+////// END OF SFINAE UTILS ///////
+//////////////////////////////////
+
+
 
 //////////////////////////////////
 ////// Compile Time String ///////
@@ -40,93 +71,75 @@ constexpr CompileTimeString<String...> operator"" _cts()
 //////////////////////////////////
 
 
-namespace bhr
+namespace eos
 {
+
+#define INJECT_PROPERTY_BODY(Type)                                  \
+    private:                                                        \
+        Name mName;                                                 \
+    public:                                                         \
+    Type value;                                                     \
+    PropertyFlags flags;                                            \
+    INJECT_EOS_META_INFO('p')                                       \
+                                                                    \
+    Property() = default;                                           \
+    Property(const Type& inValue,                                   \
+                const PropertyFlags& inFlags = {})                  \
+                    : value(inValue), flags(inFlags) {}             \
+                                                                    \
+    constexpr const char* GetName() const { return mName.value; }   \
+    operator Type&() { return value; }                              \
+                                                                    \
+    Type& operator=(const Type& inValue) {                          \
+        value = inValue;                                            \
+        return value;                                               \
+    }                                                               \
+    Type* operator->() { return &value; }                           \
+
+
+using PropertyFlags = std::unordered_map<std::string, int>;
 
 template <class T, class Name>
-struct MetaProperty
+struct Property
 {
-private:
-    Name __name;
-
-public:
-    T value;
-    BHR_SERIALIZABLE
-
-    MetaProperty() = default;
-    MetaProperty(const T& inValue) : value(inValue) {}
-
-    constexpr const char* GetName() const { return __name.value; }
-    operator T&() { return value; }
-
-    T& operator=(const T& inValue) {
-        value = inValue;
-        return value;
-    }
+    INJECT_PROPERTY_BODY(T)
 };
-
 
 template <class Name>
-struct MetaProperty<std::string, Name>
+struct Property<std::string, Name>
 {
-private:
-    Name name;
+    using Type = std::string;
+    INJECT_PROPERTY_BODY(Type);
 
-public:
-    std::string value;
-    BHR_SERIALIZABLE
-
-    MetaProperty() = default;
-    MetaProperty(const char* inValue) : value(inValue) {}
-
-    constexpr const char* GetName() const { return name.value; }
-    operator std::string&() { return value; }
+    Property(const char* inValue) : value(inValue) {}
     operator const char* () { return value.c_str(); }
-
-    std::string& operator=(const char* inValue) {
+    Type& operator=(const char* inValue) {
         value = inValue;
         return value;
     }
 };
 
-}
 
-
-//////////////////////////////////
-////////// SFINAE UTILS //////////
-//////////////////////////////////
-namespace bhr::sfinae_utils
+template <class T, class Name>
+struct Property<std::vector<T>, Name>
 {
+    using Type = std::vector<T>;
+    INJECT_PROPERTY_BODY(Type);
 
-struct sfinae_base {
-  typedef char yes[1];
-  typedef char no[2];
+    T& operator[](size_t i) {
+        return value[i];
+    }
 };
 
-
-template <typename T>
-class is_serializable_struct : public sfinae_base
+template <class K, class V, class Name>
+struct Property<std::map<K, V>, Name>
 {
-    template<typename C> static yes& test( decltype(std::declval<C>().__BHR_STRUCT_NAME__) );
-    template<typename C> static no& test(...) {};
+    using Type = std::map<K, V>;
+    INJECT_PROPERTY_BODY(Type);
 
-public:
-    static bool const value = sizeof(test<T>(0)) == sizeof(yes);
-};
-
-template <typename T>
-class is_serializable : public sfinae_base
-{
-    template<typename C> static yes& test( decltype(std::declval<C>().__BHR_VAR_NAME__) );
-    template<typename C> static no& test(...) {};
-
-public:
-    static bool const value = sizeof(test<T>(0)) == sizeof(yes);
+    V& operator[](K key) {
+        return value[key];
+    }
 };
 
 }
-
-//////////////////////////////////
-////// END OF SFINAE UTILS ///////
-//////////////////////////////////
-

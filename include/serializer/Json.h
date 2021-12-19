@@ -11,13 +11,13 @@
 #include "utils/Utils.h"
 #include "types/Serializable.h"
 
-namespace bhr::serializer
+namespace eos::serializer
 {
 
 ////////////////////////////////////////////////
 ////////////////// DESERIALIZER ////////////////
 ////////////////////////////////////////////////
-class NlohmannDeserializer
+class JsonDeserializer
 {
     using InSerialized = nlohmann::json;
 
@@ -38,11 +38,11 @@ private:
     static constexpr void deserialize_impl(const InSerialized& inSerialized,
                                            T& outValue)
     {
-        if constexpr (sfinae_utils::is_serializable<T>::value)
+        if constexpr (sfinae_utils::serializable<T>::is_property)
         {
             auto value = inSerialized[outValue.GetName()];
 
-            if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
+            if constexpr (sfinae_utils::serializable<decltype(std::declval<T>().value)>::is_object)
             {
                 deserialize(inSerialized[outValue.GetName()], outValue.value); // recursion
             }
@@ -72,7 +72,7 @@ private:
     static constexpr void deserialize_key_value(const InSerialized& inSerialized,
                                                 T& outValue)
     {
-        if constexpr (sfinae_utils::is_serializable_struct<T>::value)
+        if constexpr (sfinae_utils::serializable<T>::is_object)
         {
             deserialize(inSerialized, outValue);
         }
@@ -118,7 +118,7 @@ private:
 ////////////////////////////////////////////////
 /////////////////// SERIALIZER /////////////////
 ////////////////////////////////////////////////
-class NlohmannSerializer
+class JsonSerializer
 {
     using OutSerialized = nlohmann::json;
 
@@ -127,7 +127,7 @@ private:
     static void serialize_array_value(OutSerialized& outSerialized,
                                       const T& inValue)
     {
-        if constexpr (sfinae_utils::is_serializable_struct<T>::value)
+        if constexpr (sfinae_utils::serializable<T>::is_object)
         {
             nlohmann::json obj;
             serialize(obj, inValue); // recursion
@@ -190,9 +190,9 @@ private:
     static constexpr void serialize_impl(OutSerialized& outSerialized,
                                          const T& inSerializable)
     {
-        if constexpr (sfinae_utils::is_serializable<T>::value)
+        if constexpr (sfinae_utils::serializable<T>::is_property)
         {
-            if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
+            if constexpr (sfinae_utils::serializable<decltype(std::declval<T>().value)>::is_object)
             {
                 serialize(outSerialized[inSerializable.GetName()], inSerializable.value); // recursion
             }
@@ -230,22 +230,21 @@ public:
 
 
 
-class NlohmannJSON
+class Json
 {
-    using OutSerialized = nlohmann::json;
-    using InSerialized = nlohmann::json;
+    using JsonObject = nlohmann::json;
 
 public:
     template <class InSerializable>
-    static void serialize(OutSerialized& outSerialized, const InSerializable& inSerializable)
+    static void toJson(JsonObject& outSerialized, const InSerializable& inSerializable)
     {
-        NlohmannSerializer::serialize(outSerialized, inSerializable);
+        JsonSerializer::serialize(outSerialized, inSerializable);
     }
 
     template <class OutDeserialized>
-    static void deserialize(const InSerialized& inSerialized, OutDeserialized& outDeserialized)
+    static void fromJson(const JsonObject& inSerialized, OutDeserialized& outDeserialized)
     {
-        NlohmannDeserializer::deserialize(inSerialized, outDeserialized);
+        JsonDeserializer::deserialize(inSerialized, outDeserialized);
     }
 };
 

@@ -1,45 +1,46 @@
 #pragma once
 
 #include "types/Serializable.h"
-#include "serializer/NlohmannJSON.h"
+#include "serializer/Json.h"
 #include <iostream>
+#include "eos.h"
 
-namespace bhr::example2
+namespace eos::example2
 {
 
 struct Location
 {
-    BHR_TYPE(double, latitude);
-    BHR_TYPE(double, longitude);
-    BHR_TYPE(int, altitude);
+    EOS_PROPERTY(double, latitude);
+    EOS_PROPERTY(double, longitude);
+    EOS_PROPERTY(int, altitude);
 
-    BHR_SERIALIZABLE_STRUCT
+    EOS_OBJECT
 };
 
 struct NamedLocation
 {
-    BHR_TYPE(std::string, name);
-    BHR_TYPE(Location, location);
+    EOS_PROPERTY(std::string, name);
+    EOS_PROPERTY(Location, location);
 
-    BHR_SERIALIZABLE_STRUCT
+    EOS_OBJECT
 };
 
 struct Person
 {
-    BHR_TYPE(std::string, name);
-    BHR_TYPE(int, age);
+    EOS_PROPERTY(std::string, name);
+    EOS_PROPERTY(int, age);
 
-    BHR_SERIALIZABLE_STRUCT
+    EOS_OBJECT
 };
 
 
 struct Trip
 {
-    BHR_TYPE(std::string, title);
-    BHR_TYPE(Person, person);
-    BHR_TYPE(std::vector<NamedLocation>, route);
+    EOS_PROPERTY(std::string, title);
+    EOS_PROPERTY(Person, person);
+    EOS_PROPERTY(std::vector<NamedLocation>, route);
 
-    BHR_SERIALIZABLE_STRUCT
+    EOS_OBJECT
 };
 
 class Example_2
@@ -55,7 +56,7 @@ public:
                      }
                     };
 
-        std::cout << serializer::NlohmannSerializer::serialize(user) << std::endl;
+        std::cout << eos::toJson(user) << std::endl;
     }
 };
 

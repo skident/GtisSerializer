@@ -3,7 +3,7 @@
 #include <tuple>
 
 //https://stackoverflow.com/questions/38561242/struct-to-from-stdtuple-conversion
-namespace bhr::utils
+namespace eos::utils
 {
 
 namespace details

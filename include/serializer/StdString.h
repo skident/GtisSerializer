@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-namespace bhr::serializer
+namespace eos::serializer
 {
 
 class StdString
