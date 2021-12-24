@@ -11,7 +11,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/third)
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include)
 
 # Find source files
-file(GLOB_RECURSE INCLUDES include/*.h)
+file(GLOB_RECURSE INCLUDES include/*.h *.cpp)
 file(GLOB_RECURSE SRC_INCLUDES src/*.h)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 

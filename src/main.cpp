@@ -1,16 +1,16 @@
-#include "example_1.h"
-#include "example_2.h"
-#include "example_3.h"
-#include "example_4.h"
+#include "samples/meta/samples.h"
+#include "samples/settings/sample.h"
+#include "samples/profile/sample.h"
+#include "samples/types/sample.h"
 
 using namespace eos;
 
 int main()
 {
-    Example_1::run();
-    Example_2::run();
-    Example_3().run();
-    Example_4::run();
+    samples::meta::run();
+    samples::settings::run();
+    samples::profile::run();
+    samples::types::run();
 
     return 0;
 }
