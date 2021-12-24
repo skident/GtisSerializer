@@ -1,13 +1,14 @@
 #pragma once
 
-#include "types/Serializable.h"
-#include "serializer/Json.h"
+#include "meta/meta_property.h"
+#include "meta/jsonizer.h"
 #include <iostream>
 #include "eos.h"
 
-namespace eos::example2
+namespace eos
 {
 
+namespace {
 struct Location
 {
     EOS_PROPERTY(double, latitude);
@@ -42,6 +43,7 @@ struct Trip
 
     EOS_OBJECT
 };
+}
 
 class Example_2
 {
@@ -56,7 +58,7 @@ public:
                      }
                     };
 
-        std::cout << eos::toJson(user) << std::endl;
+        std::cout << eos::to_json(user) << std::endl;
     }
 };
 

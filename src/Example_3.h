@@ -1,11 +1,11 @@
 #pragma once
 
-#include "types/Serializable.h"
-#include "serializer/Json.h"
+#include "meta/meta_property.h"
+#include "meta/jsonizer.h"
 #include <iostream>
 #include <string>
 
-namespace eos::example3
+namespace
 {
 
 struct Config {
@@ -47,7 +47,7 @@ struct Config {
     EOS_PROPERTY(Config::AppCfg, app);
     EOS_PROPERTY(Config::RestApiCfg, restapi); // FIXME: nested SERIALIZABLE structures are causing crash on exit
 };
-
+}
 
 class Example_3
 {
@@ -99,7 +99,7 @@ public:
 
 
         auto jsonObj = nlohmann::json::parse(json);
-        serializer::Json::fromJson(jsonObj, config);
+        eos::meta::jsonizer::from_json(jsonObj, config);
     }
 
     void run()
@@ -112,4 +112,3 @@ public:
     }
 };
 
-}

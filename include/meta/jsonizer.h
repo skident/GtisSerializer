@@ -8,43 +8,43 @@
 #include <list>
 
 #include "nlohmann/json.hpp"
-#include "utils/Utils.h"
-#include "types/Serializable.h"
+#include "meta/tuple_to_struct.h"
+#include "meta/meta_property.h"
 
-namespace eos::serializer
+namespace eos::meta
 {
 
 ////////////////////////////////////////////////
 ////////////////// DESERIALIZER ////////////////
 ////////////////////////////////////////////////
-class JsonDeserializer
+class json_deserializer
 {
-    using InSerialized = nlohmann::json;
+    using in_serialized_t = nlohmann::json;
 
 public:
     template <class OutDeserialized>
-    static void deserialize(const InSerialized& inSerialized, OutDeserialized& outDeserialized)
+    static void deserialize(const in_serialized_t& inSerialized, OutDeserialized& outDeserialized)
     {
         auto tmpTupple = boost::pfr::structure_to_tuple(outDeserialized);
         std::apply([inSerialized](auto&&... elem) {
             (deserialize_impl(inSerialized, elem),...);
         }, tmpTupple);
 
-        outDeserialized = utils::make_struct<OutDeserialized>(tmpTupple);
+        outDeserialized = meta::make_struct<OutDeserialized>(tmpTupple);
     }
 
 private:
     template <class T>
-    static constexpr void deserialize_impl(const InSerialized& inSerialized,
+    static constexpr void deserialize_impl(const in_serialized_t& inSerialized,
                                            T& outValue)
     {
-        if constexpr (sfinae_utils::serializable<T>::is_property)
+        if constexpr (meta::is_meta<T>::property)
         {
-            auto value = inSerialized[outValue.GetName()];
+            auto value = inSerialized[outValue.meta_property_name()];
 
-            if constexpr (sfinae_utils::serializable<decltype(std::declval<T>().value)>::is_object)
+            if constexpr (meta::is_meta<decltype(std::declval<T>().value)>::object)
             {
-                deserialize(inSerialized[outValue.GetName()], outValue.value); // recursion
+                deserialize(inSerialized[outValue.meta_property_name()], outValue.value); // recursion
             }
             else
             {
@@ -54,7 +54,7 @@ private:
     }
 
     template <class T, class U>
-    static void deserialize_key_value(const InSerialized& inSerialized,
+    static void deserialize_key_value(const in_serialized_t& inSerialized,
                                       std::map<T, U>& outMap)
     {
         for (const auto& [key, value] : inSerialized.items())
@@ -69,10 +69,10 @@ private:
 
 
     template <class T>
-    static constexpr void deserialize_key_value(const InSerialized& inSerialized,
+    static constexpr void deserialize_key_value(const in_serialized_t& inSerialized,
                                                 T& outValue)
     {
-        if constexpr (sfinae_utils::serializable<T>::is_object)
+        if constexpr (meta::is_meta<T>::object)
         {
             deserialize(inSerialized, outValue);
         }
@@ -83,7 +83,7 @@ private:
     }
 
     template <class T>
-    static constexpr void deserialize_key_value(const InSerialized& inSerialized,
+    static constexpr void deserialize_key_value(const in_serialized_t& inSerialized,
                                                 std::vector<T>& outValue)
     {
         if (inSerialized.is_array())
@@ -101,7 +101,7 @@ private:
     }
 
     template <class T>
-    static constexpr void deserialize_key_value(const InSerialized& inSerialized,
+    static constexpr void deserialize_key_value(const in_serialized_t& inSerialized,
                                                 std::set<T>& outValue)
     {
         std::vector<T> tmp;
@@ -118,16 +118,16 @@ private:
 ////////////////////////////////////////////////
 /////////////////// SERIALIZER /////////////////
 ////////////////////////////////////////////////
-class JsonSerializer
+class json_serializer
 {
-    using OutSerialized = nlohmann::json;
+    using out_serialized_t = nlohmann::json;
 
 private:
     template <class T>
-    static void serialize_array_value(OutSerialized& outSerialized,
+    static void serialize_array_value(out_serialized_t& outSerialized,
                                       const T& inValue)
     {
-        if constexpr (sfinae_utils::serializable<T>::is_object)
+        if constexpr (meta::is_meta<T>::object)
         {
             nlohmann::json obj;
             serialize(obj, inValue); // recursion
@@ -140,7 +140,7 @@ private:
     }
 
     template <class T>
-    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+    static constexpr void serialize_key_value(out_serialized_t& outSerialized,
                                               const std::string& inName,
                                               const T& inValue)
     {
@@ -148,7 +148,7 @@ private:
     }
 
     template <class T>
-    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+    static constexpr void serialize_key_value(out_serialized_t& outSerialized,
                                               const std::string& inName,
                                               const std::vector<T>& inSerializable)
     {
@@ -160,7 +160,7 @@ private:
     }
 
     template <class T>
-    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+    static constexpr void serialize_key_value(out_serialized_t& outSerialized,
                                               const std::string& inName,
                                               const std::set<T>& inSerializable)
     {
@@ -168,7 +168,7 @@ private:
     }
 
     template <class T>
-    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+    static constexpr void serialize_key_value(out_serialized_t& outSerialized,
                                               const std::string& inName,
                                               const std::list<T>& inSerializable)
     {
@@ -176,7 +176,7 @@ private:
     }
 
     template <class T, class U>
-    static constexpr void serialize_key_value(OutSerialized& outSerialized,
+    static constexpr void serialize_key_value(out_serialized_t& outSerialized,
                                               const std::string& inName,
                                               const std::map<T, U>& inSerializable)
     {
@@ -187,18 +187,18 @@ private:
     }
 
     template <class T>
-    static constexpr void serialize_impl(OutSerialized& outSerialized,
+    static constexpr void serialize_impl(out_serialized_t& outSerialized,
                                          const T& inSerializable)
     {
-        if constexpr (sfinae_utils::serializable<T>::is_property)
+        if constexpr (meta::is_meta<T>::property)
         {
-            if constexpr (sfinae_utils::serializable<decltype(std::declval<T>().value)>::is_object)
+            if constexpr (meta::is_meta<decltype(std::declval<T>().value)>::object)
             {
-                serialize(outSerialized[inSerializable.GetName()], inSerializable.value); // recursion
+                serialize(outSerialized[inSerializable.meta_property_name()], inSerializable.value); // recursion
             }
             else
             {
-                serialize_key_value(outSerialized, inSerializable.GetName(), inSerializable.value);
+                serialize_key_value(outSerialized, inSerializable.meta_property_name(), inSerializable.value);
             }
         }
         else {
@@ -208,7 +208,7 @@ private:
 
 public:
     template <class InSerializable>
-    static void serialize(OutSerialized& outSerialized, const InSerializable& inSerializable)
+    static void serialize(out_serialized_t& outSerialized, const InSerializable& inSerializable)
     {
         auto tmpTuple = boost::pfr::structure_to_tuple(inSerializable);
         std::apply([&outSerialized](auto&&... elem) {
@@ -217,9 +217,9 @@ public:
     }
 
     template <class InSerializable>
-    static OutSerialized serialize(const InSerializable& inSerializable)
+    static out_serialized_t serialize(const InSerializable& inSerializable)
     {
-        OutSerialized outSerialized;
+        out_serialized_t outSerialized;
         serialize(outSerialized, inSerializable);
         return outSerialized;
     }
@@ -230,27 +230,27 @@ public:
 
 
 
-class Json
+class jsonizer
 {
-    using JsonObject = nlohmann::json;
+    using json_object = nlohmann::json;
 
 public:
     template <class InSerializable>
-    static void toJson(JsonObject& outSerialized, const InSerializable& inSerializable)
+    static void to_json(json_object& outSerialized, const InSerializable& inSerializable)
     {
-        JsonSerializer::serialize(outSerialized, inSerializable);
+        json_serializer::serialize(outSerialized, inSerializable);
     }
 
     template <class OutDeserialized>
-    static void fromJson(const JsonObject& inSerialized, OutDeserialized& outDeserialized)
+    static void from_json(const json_object& inSerialized, OutDeserialized& outDeserialized)
     {
-        JsonDeserializer::deserialize(inSerialized, outDeserialized);
+        json_deserializer::deserialize(inSerialized, outDeserialized);
     }
 
     template <class OutDeserialized>
-    static void fromJson(const std::string& inJson, OutDeserialized& outDeserialized)
+    static void from_json(const std::string& inJson, OutDeserialized& outDeserialized)
     {
-        JsonDeserializer::deserialize(nlohmann::json::parse(inJson), outDeserialized);
+        json_deserializer::deserialize(nlohmann::json::parse(inJson), outDeserialized);
     }
 
 };

@@ -1,14 +1,16 @@
-#include "Example_1.h"
-#include "Example_2.h"
-#include "Example_3.h"
+#include "example_1.h"
+#include "example_2.h"
+#include "example_3.h"
+#include "example_4.h"
 
 using namespace eos;
 
 int main()
 {
-    example::Example_1::run();
-    example2::Example_2::run();
-    example3::Example_3().run();
+    Example_1::run();
+    Example_2::run();
+    Example_3().run();
+    Example_4::run();
 
     return 0;
 }

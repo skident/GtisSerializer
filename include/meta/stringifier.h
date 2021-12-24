@@ -6,15 +6,15 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sstream>
 
-#include "utils/Utils.h"
+#include "tuple_to_struct.h"
+#include "meta_property.h"
 
-#include "types/Serializable.h"
-
-namespace eos::serializer
+namespace eos::meta
 {
 
-class StdOstream
+class stringifier
 {
     using OutSerialized = std::ostream;
     using InSerialized = std::istream;
@@ -43,10 +43,10 @@ private:
     static constexpr void serialize_value(OutSerialized& outSerialized,
                                          const T& inValue)
     {
-        if constexpr (sfinae_utils::is_serializable_struct<T>::value)
+        if constexpr (meta::is_meta<T>::object)
         {
             outSerialized << S_CURLY_BRACE_OPEN;
-            serialize(outSerialized, inValue); // recursion
+            to_stream(outSerialized, inValue); // recursion
             outSerialized << S_CURLY_BRACE_CLOSE;
         }
         else
@@ -103,13 +103,13 @@ private:
     static constexpr void serialize_impl(OutSerialized& outSerialized,
                                          const T& inSerializable)
     {
-        if constexpr (sfinae_utils::is_serializable<T>::value)
+        if constexpr (meta::is_meta<T>::property)
         {
-            outSerialized << S_QUOTE << inSerializable.GetName() << S_QUOTE << S_COLON << S_SPACE;
-            if constexpr (sfinae_utils::is_serializable_struct<decltype(std::declval<T>().value)>::value)
+            outSerialized << S_QUOTE << inSerializable.meta_property_name() << S_QUOTE << S_COLON << S_SPACE;
+            if constexpr (meta::is_meta<decltype(std::declval<T>().value)>::object)
             {
                 outSerialized << S_CURLY_BRACE_OPEN;
-                serialize(outSerialized, inSerializable.value); // recursion
+                to_stream(outSerialized, inSerializable.value); // recursion
                 outSerialized << S_CURLY_BRACE_CLOSE;
             }
             else
@@ -134,7 +134,7 @@ private:
     for_loop(bool first, OutSerialized& outSerialized, std::tuple<Tp...>& t)
     {
         auto item = std::get<I>(t);
-        constexpr bool serializable = sfinae_utils::is_serializable<decltype(item)>::value;
+        constexpr bool serializable = meta::is_meta<decltype(item)>::property;
 
         if (serializable)
         {
@@ -148,11 +148,28 @@ private:
 
 public:
     template <class InSerializable>
-    static constexpr void serialize(OutSerialized& outSerialized,
+    static constexpr void to_stream(OutSerialized& outSerialized,
                                     const InSerializable& inSerializable)
     {
         auto tmpTuple = boost::pfr::structure_to_tuple(inSerializable);
         for_loop(true, outSerialized, tmpTuple);
+    }
+
+    using out_serialized_str_t = std::string;
+    template <class InSerializable>
+    static void to_string(out_serialized_str_t& outSerialized, const InSerializable& inSerializable)
+    {
+        std::stringstream result;
+        to_stream(result, inSerializable);
+        outSerialized = result.str();
+    }
+
+    template <class InSerializable>
+    static out_serialized_str_t to_string(const InSerializable& inSerializable)
+    {
+        std::string result;
+        to_string(result, inSerializable);
+        return result;
     }
 };
 
